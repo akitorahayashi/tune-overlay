@@ -1,13 +1,13 @@
 # ==============================================================================
-# justfile for TemplatePackage automation
+# justfile for ToneOverlay automation
 # ==============================================================================
 
 # --- PROJECT SETTINGS ---
-PACKAGE_NAME := "sft-pkg-tmpl"
+PACKAGE_NAME := "tone-overlay"
 
 # --- SWIFT PACKAGE OPTIONS ---
 HOME_DIR := env("HOME")
-SWIFTPM_ROOT := env("SWIFTPM_ROOT", HOME_DIR + "/.cache/swiftpm/sft-pkg-tmpl")
+SWIFTPM_ROOT := env("SWIFTPM_ROOT", HOME_DIR + "/.cache/swiftpm/tone-overlay")
 SWIFTPM_DEP_CACHE := SWIFTPM_ROOT + "/dependencies"
 SWIFTPM_ARTIFACT_ROOT := SWIFTPM_ROOT + "/artifacts"
 
@@ -73,7 +73,7 @@ check: fix
 # ==============================================================================
 
 # Usage: just pkg-test [filter] [ci] [extra_args]
-# filter: Optional regex to filter tests (e.g., "TemplatePackageTests")
+# filter: Optional regex to filter tests (e.g., "ToneOverlayTests")
 # ci: Optional CI mode flag ("true" limits workers to 1)
 # extra_args: Additional arguments passed to swift test (e.g. "--skip-build")
 pkg-test filter="" ci="false" *extra_args:

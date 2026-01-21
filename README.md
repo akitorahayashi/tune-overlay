@@ -1,53 +1,81 @@
-# Swift Package Template (`sft-pkg-tmpl`)
+# ToneOverlay
 
-`sft-pkg-tmpl` is a lightweight Swift Package Manager template that provides a starting point for building new libraries. It ships with a minimal implementation target (`TemplatePackage`), unit and integration test targets, ready-to-use GitHub Actions workflows, and convenience scripts powered by `just`.
+ToneOverlay is a SwiftUI package that applies tone adjustments while preserving transparency. The package ships
+with a `toneOverlay` view modifier and a configurable style model.
 
-## Installation
+## Requirements
 
-Add the package as a dependency in your `Package.swift`:
+- iOS 16 or later
+- macOS 13 or later
+- Swift 6
+
+## Package Usage
+
+The package is added as a dependency in `Package.swift`:
 
 ```swift
 let package = Package(
     name: "YourApp",
     dependencies: [
-        .package(url: "https://github.com/your-org/sft-pkg-tmpl", from: "0.1.0")
+        .package(url: "https://github.com/your-org/tone-overlay", from: "0.1.0")
     ],
     targets: [
         .target(
             name: "YourApp",
             dependencies: [
-                .product(name: "TemplatePackage", package: "sft-pkg-tmpl")
+                .product(name: "ToneOverlay", package: "tone-overlay")
             ]
         )
     ]
 )
 ```
 
-## Quick Start
-
-Import the library and use the starter API:
+The library is imported and the modifier is applied in SwiftUI with explicit style values:
 
 ```swift
-import TemplatePackage
+import ToneOverlay
+import SwiftUI
 
-let sut = TemplatePackage()
-print(sut.hello()) // "Hello from TemplatePackage"
+let style = ToneOverlayStyle(
+    desaturation: 0.6,
+    dim: 0.18,
+    contrast: 0.9,
+    tint: .black,
+    tintOpacity: 0.12,
+    veilOpacity: 0.08
+)
+
+Image("red_ball")
+    .toneOverlay(isLocked: true, style: style)
 ```
 
-Use the provided `.env.example` to document any environment variables your downstream package might need. Copy it into `.env` during setup:
+## Style parameters
 
-```bash
-cp .env.example .env
+- desaturation reduces color intensity
+- dim darkens the content
+- contrast controls contrast
+- tint and tintOpacity apply a color overlay
+- veilOpacity applies a soft veil
+
+## Tint only example
+
+```swift
+let alertStyle = ToneOverlayStyle.tinted(
+    color: .red,
+    opacity: 0.35,
+    desaturation: 0.0,
+    dim: 0.0,
+    contrast: 1.0
+)
+
+Image("enemy_icon")
+    .toneOverlay(isLocked: true, style: alertStyle)
 ```
 
 ## Development
 
-This template relies on [`just`](https://github.com/casey/just) for common tasks. Run `just --list` to see the available recipes. Key commands include:
+Project automation is provided via [`just`](https://github.com/casey/just), and the main recipes include:
 
-- `just setup` – bootstrap the repository and install tooling via Mint.
-- `just lint` – run SwiftFormat in lint mode and SwiftLint.
-- `just unit-test` – execute `TemplatePackageUnitTests`.
-- `just intg-test` – execute `TemplatePackageIntgTests`.
-- `just test` – run the full test suite.
-
-Feel free to expand or replace the placeholder implementation with your domain-specific logic. The documentation under `docs/` highlights how to adapt configuration, testing, and contribution guidelines for your project.
+- `just setup` – tool bootstrap via Mint.
+- `just check` – SwiftFormat lint mode plus SwiftLint.
+- `just test` – full test suite.

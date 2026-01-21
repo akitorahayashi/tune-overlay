@@ -4,15 +4,15 @@
 import PackageDescription
 
 let package = Package(
-  name: "sft-pkg-tmpl",
+  name: "tone-overlay",
   platforms: [
     .iOS(.v16),
     .macOS(.v13),
   ],
   products: [
     .library(
-      name: "TemplatePackage",
-      targets: ["TemplatePackage"]
+      name: "ToneOverlay",
+      targets: ["ToneOverlay"]
     ),
   ],
   dependencies: [
@@ -20,11 +20,19 @@ let package = Package(
   ],
   targets: [
     .target(
-      name: "TemplatePackage"
+      name: "ToneOverlay"
+    ),
+    .target(
+      name: "ToneOverlayExamples",
+      dependencies: ["ToneOverlay"],
+      path: "Examples/ToneOverlayExamples",
+      resources: [
+        .process("Resources"),
+      ]
     ),
     .testTarget(
-      name: "TemplatePackageTests",
-      dependencies: ["TemplatePackage"]
+      name: "ToneOverlayTests",
+      dependencies: ["ToneOverlay"]
     ),
   ]
 )
