@@ -1,26 +1,26 @@
 import SwiftUI
 
 public extension View {
-  func toneOverlay(isLocked: Bool, style: ToneOverlayStyle) -> some View {
-    self.modifier(ToneOverlayModifier(isLocked: isLocked, style: style))
+  func toneOverlay(isActive: Bool = true, style: ToneOverlayStyle) -> some View {
+    self.modifier(ToneOverlayModifier(isActive: isActive, style: style))
   }
 }
 
 private struct ToneOverlayModifier: ViewModifier {
-  let isLocked: Bool
+  let isActive: Bool
   let style: ToneOverlayStyle
 
   @ViewBuilder
   func body(content: Content) -> some View {
-    if self.isLocked {
-      content
-        .saturation(self.saturationAmount)
-        .brightness(-self.style.dim)
-        .contrast(self.style.contrast)
-        .overlay(self.overlayView.mask(content))
-    } else {
-      content
-    }
+    content
+      .saturation(self.isActive ? self.saturationAmount : 1.0)
+      .brightness(self.isActive ? -self.style.dim : 0.0)
+      .contrast(self.isActive ? self.style.contrast : 1.0)
+      .overlay(
+        self.overlayView
+          .opacity(self.isActive ? 1.0 : 0.0)
+          .mask(content)
+      )
   }
 
   private var saturationAmount: Double {

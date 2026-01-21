@@ -183,7 +183,7 @@ private struct ToneOverlayPreviewCell: View {
         .scaledToFit()
 
       if let style = self.style {
-        base.toneOverlay(isLocked: true, style: style)
+        base.toneOverlay(style: style)
       } else {
         base
       }
@@ -234,7 +234,7 @@ private struct ToneOverlayTextCell: View {
       .font(.system(size: 24, weight: .black, design: .rounded))
 
     if let style = self.style {
-      base.toneOverlay(isLocked: true, style: style)
+      base.toneOverlay(style: style)
     } else {
       base
     }
@@ -262,7 +262,7 @@ private struct ToneOverlayShapeCell: View {
       )
 
     if let style = self.style {
-      base.toneOverlay(isLocked: true, style: style)
+      base.toneOverlay(style: style)
     } else {
       base
     }

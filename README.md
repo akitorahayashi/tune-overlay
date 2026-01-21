@@ -1,7 +1,7 @@
 # ToneOverlay
 
-ToneOverlay is a SwiftUI package that applies tone adjustments while preserving transparency. The package ships
-with a `toneOverlay` view modifier and a configurable style model.
+ToneOverlay is a SwiftUI package that applies customizable tone adjustments and overlays while preserving
+transparency. The package ships with a `toneOverlay` view modifier and a configurable style model.
 
 ## Requirements
 
@@ -46,7 +46,7 @@ let style = ToneOverlayStyle(
 )
 
 Image("red_ball")
-    .toneOverlay(isLocked: true, style: style)
+    .toneOverlay(style: style)
 ```
 
 ## Style parameters
@@ -69,7 +69,28 @@ let alertStyle = ToneOverlayStyle.tinted(
 )
 
 Image("enemy_icon")
-    .toneOverlay(isLocked: true, style: alertStyle)
+    .toneOverlay(style: alertStyle)
+```
+
+## Animation
+
+The transition between active and inactive states can be animated using standard SwiftUI animation modifiers:
+
+```swift
+// Example 1: Using `withAnimation` for implicit animation.
+// Assumes `isActive` is a @State var.
+VStack {
+    Image("icon")
+        .toneOverlay(isActive: isActive, style: style)
+    Button("Toggle") {
+        withAnimation { isActive.toggle() }
+    }
+}
+
+// Example 2: Using the `.animation()` modifier for explicit animation.
+Image("icon")
+    .toneOverlay(isActive: isActive, style: style)
+    .animation(.easeInOut, value: isActive)
 ```
 
 ## Development

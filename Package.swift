@@ -14,6 +14,10 @@ let package = Package(
       name: "ToneOverlay",
       targets: ["ToneOverlay"]
     ),
+    .library(
+      name: "ToneOverlayExamples",
+      targets: ["ToneOverlayExamples"]
+    ),
   ],
   dependencies: [
     // Add third-party dependencies here when needed.

@@ -1,6 +1,6 @@
 # ToneOverlay Overview
 
-ToneOverlay is a SwiftUI package that applies a locked or unavailable visual treatment while preserving
+ToneOverlay is a SwiftUI package that applies visual tone adjustments while preserving
 transparency. The package ships with preset styles and a `toneOverlay` view modifier.
 
 ## Project Summary
