@@ -1,0 +1,30 @@
+name: Run Tests
+
+on:
+  workflow_call:
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: macos-15
+    env:
+      MINT_PATH: ${{ github.workspace }}/.mint
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup environment
+        uses: ./.github/actions/setup
+        with:
+          setup_xcode: true
+          setup_ruby: false
+
+      - name: Setup Swift
+        uses: swift-actions/setup-swift@v2
+        with:
+          swift-version: '6.0'
+
+      - name: Run Tests
+        id: tests
+        run: just test

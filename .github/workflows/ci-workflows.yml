@@ -1,0 +1,17 @@
+name: CI Workflows
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  run-linters:
+    name: Run Linters
+    uses: ./.github/workflows/run-linters.yml
+
+  run-tests:
+    name: Run Tests
+    uses: ./.github/workflows/run-tests.yml
