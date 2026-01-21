@@ -35,24 +35,12 @@ setup:
     @echo "✅ Project setup complete."
 
 # Resolve Swift package dependencies
-resolve-packages cache_path=SWIFTPM_DEP_CACHE:
-    #!/usr/bin/env bash
-    set -e
-    echo "Using dependency cache at: {{cache_path}}"
-    mkdir -p "{{cache_path}}"
-    echo "🔄 Resolving dependencies for {{PACKAGE_NAME}}..."
-    swift package resolve --cache-path "{{cache_path}}"
-    echo "✅ Package resolution complete."
-
-# Reset SwiftPM cache, dependencies, and build artifacts
-resolve-pkg:
-    @echo "Removing SwiftPM build and cache..."
-    @rm -rf .build
-    @rm -rf {{SWIFTPM_ROOT}}
-    @echo "✅ SwiftPM build and cache removed."
-    @echo "Resolving Swift package dependencies..."
-    @just resolve-packages
-    @echo "✅ Package dependencies resolved."
+rel-pkg cache_path=SWIFTPM_DEP_CACHE reset="false":
+    @echo "Using dependency cache at: {{cache_path}}"
+    @mkdir -p "{{cache_path}}"
+    @echo "🔄 Resolving dependencies for {{PACKAGE_NAME}}..."
+    @swift package resolve --cache-path "{{cache_path}}"
+    @echo "✅ Package resolution complete."
 
 # ==============================================================================
 # Lint & Format
