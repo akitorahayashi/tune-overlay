@@ -20,7 +20,12 @@ let package = Package(
   ],
   targets: [
     .target(
-      name: "ToneOverlay",
+      name: "ToneOverlay"
+    ),
+    .target(
+      name: "ToneOverlayExamples",
+      dependencies: ["ToneOverlay"],
+      path: "Examples/ToneOverlayExamples",
       resources: [
         .process("Resources"),
       ]
