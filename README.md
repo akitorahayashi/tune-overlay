@@ -1,7 +1,8 @@
 # ToneOverlay
 
-ToneOverlay is a SwiftUI package that applies customizable tone adjustments and overlays while preserving
-transparency. The package ships with a `toneOverlay` view modifier and a configurable style model.
+ToneOverlay is a Swift package that applies customizable tone adjustments and overlays while preserving
+transparency. The package supports both SwiftUI views and SpriteKit nodes, using a shared
+`ToneOverlayStyle` configuration model.
 
 ## Requirements
 
@@ -47,6 +48,27 @@ let style = ToneOverlayStyle(
 
 Image("red_ball")
     .toneOverlay(style: style)
+```
+
+## SpriteKit Usage
+
+The same style configuration applies to SpriteKit nodes via an `SKSpriteNode` extension:
+
+```swift
+import ToneOverlay
+import SpriteKit
+
+let style = ToneOverlayStyle(
+    desaturation: 1.0,
+    dim: 0.2,
+    contrast: 0.8
+)
+
+let sprite = SKSpriteNode(imageNamed: "planet")
+sprite.applyToneOverlay(isActive: true, style: style)
+
+// To remove the overlay effect:
+sprite.applyToneOverlay(isActive: false, style: style)
 ```
 
 ## Style parameters
