@@ -41,6 +41,10 @@ extension SKSpriteNode {
   // MARK: - Shader Source
 
   private static let toneOverlayShaderSource = """
+  // SpriteKit shader for tone overlay effects
+  // Uniform declarations (SpriteKit auto-injects these)
+  // u_desaturation, u_dim, u_contrast, u_tintR, u_tintG, u_tintB, u_tintOpacity, u_veilOpacity
+
   void main() {
     // Sample the texture using SpriteKit's built-in texture sampler
     vec4 color = SKDefaultShading();
@@ -55,18 +59,18 @@ extension SKSpriteNode {
     vec3 rgb = color.rgb / color.a;
 
     // 1. Desaturation: blend toward grayscale
-    float gray = dot(rgb, vec3(0.2126, 0.7152, 0.0722));
-    rgb = mix(rgb, vec3(gray), u_desaturation);
+    float luminance = dot(rgb, vec3(0.2126, 0.7152, 0.0722));
+    rgb = mix(rgb, vec3(luminance), u_desaturation);
 
     // 2. Dimming: reduce brightness
-    rgb = rgb - u_dim;
+    rgb = rgb - vec3(u_dim);
 
     // 3. Contrast adjustment: scale around midpoint (0.5)
-    rgb = (rgb - 0.5) * u_contrast + 0.5;
+    rgb = (rgb - vec3(0.5)) * u_contrast + vec3(0.5);
 
     // 4. Tint overlay: blend with tint color
-    vec3 tint = vec3(u_tintR, u_tintG, u_tintB);
-    rgb = mix(rgb, tint, u_tintOpacity);
+    vec3 tintColor = vec3(u_tintR, u_tintG, u_tintB);
+    rgb = mix(rgb, tintColor, u_tintOpacity);
 
     // 5. Veil overlay: blend with black
     rgb = mix(rgb, vec3(0.0), u_veilOpacity);
