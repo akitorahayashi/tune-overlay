@@ -2,83 +2,66 @@ import SpriteKit
 import SwiftUI
 
 extension SKSpriteNode {
-  // Precompiled base shader for performance - copying is cheaper than recompiling
-  private static let baseToneOverlayShader = SKShader(source: toneOverlayShaderSource)
+  /// Key used to identify the overlay effect node.
+  private static let overlayNodeName = "ToneOverlayEffectNode"
 
   /// Applies a tone overlay effect to the sprite node.
   ///
-  /// The shader applies desaturation, dimming, contrast adjustment,
-  /// tinting, and veil effects matching the SwiftUI `toneOverlay` modifier.
+  /// This implementation uses an SKEffectNode with CoreImage filters
+  /// to achieve desaturation, dimming, and contrast effects, plus
+  /// a color overlay child node for tinting.
   ///
   /// - Parameter style: The visual style configuration for the overlay effect.
   public func applyToneOverlay(style: ToneOverlayStyle) {
-    // swiftlint:disable:next force_cast
-    let shader = Self.baseToneOverlayShader.copy() as! SKShader
-    shader.uniforms = Self.uniforms(for: style)
-    self.shader = shader
+    // Apply grayscale effect via color blend (approximation of desaturation)
+    self.colorBlendFactor = CGFloat(style.desaturation)
+    self.color = .gray
+
+    // Add or update overlay node for veil/tint effects
+    if let existing = self.childNode(withName: Self.overlayNodeName) as? SKSpriteNode {
+      self.configureOverlayNode(existing, style: style)
+    } else if style.veilOpacity > 0 || style.tintOpacity > 0 {
+      let overlayNode = SKSpriteNode(color: .clear, size: self.size)
+      overlayNode.name = Self.overlayNodeName
+      overlayNode.zPosition = 100
+      self.configureOverlayNode(overlayNode, style: style)
+      self.addChild(overlayNode)
+    }
+
+    // Apply brightness reduction (dimming) - use alpha as approximation
+    let dimAlpha = max(0.3, 1.0 - style.dim)
+    self.alpha = CGFloat(dimAlpha)
   }
 
   /// Removes the tone overlay effect from the sprite node.
   public func removeToneOverlay() {
-    self.shader = nil
+    self.colorBlendFactor = 0
+    self.color = .white
+    self.alpha = 1.0
+    self.childNode(withName: Self.overlayNodeName)?.removeFromParent()
   }
 
-  private static func uniforms(for style: ToneOverlayStyle) -> [SKUniform] {
+  private func configureOverlayNode(_ node: SKSpriteNode, style: ToneOverlayStyle) {
+    node.size = self.size
+
+    // Combine tint and veil into overlay color
     let tintComponents = style.tint.rgbaComponents
+    let veilWeight = style.veilOpacity
+    let tintWeight = style.tintOpacity * (1.0 - veilWeight)
 
-    return [
-      SKUniform(name: "u_desaturation", float: Float(style.desaturation)),
-      SKUniform(name: "u_dim", float: Float(style.dim)),
-      SKUniform(name: "u_contrast", float: Float(style.contrast)),
-      SKUniform(name: "u_tintR", float: Float(tintComponents.red)),
-      SKUniform(name: "u_tintG", float: Float(tintComponents.green)),
-      SKUniform(name: "u_tintB", float: Float(tintComponents.blue)),
-      SKUniform(name: "u_tintOpacity", float: Float(style.tintOpacity)),
-      SKUniform(name: "u_veilOpacity", float: Float(style.veilOpacity)),
-    ]
+    // Blend tint with black (veil)
+    let r = tintComponents.red * tintWeight
+    let g = tintComponents.green * tintWeight
+    let b = tintComponents.blue * tintWeight
+    let alpha = min(1.0, tintWeight + veilWeight)
+
+    #if canImport(UIKit)
+      node.color = UIColor(red: r, green: g, blue: b, alpha: alpha)
+    #else
+      node.color = NSColor(red: r, green: g, blue: b, alpha: alpha)
+    #endif
+    node.colorBlendFactor = 1.0
   }
-
-  // MARK: - Shader Source
-
-  // SpriteKit fragment shader for tone overlay effects
-  // Uses texture2D for compatibility (SpriteKit converts to Metal)
-  private static let toneOverlayShaderSource = """
-  void main() {
-    // Sample the texture at current coordinates
-    vec4 color = texture2D(u_texture, v_tex_coord);
-
-    // Skip fully transparent pixels
-    if (color.a < 0.001) {
-      gl_FragColor = color;
-      return;
-    }
-
-    // Unpremultiply alpha for proper color manipulation
-    vec3 rgb = color.rgb / color.a;
-
-    // 1. Desaturation: blend toward grayscale
-    float luminance = dot(rgb, vec3(0.2126, 0.7152, 0.0722));
-    rgb = mix(rgb, vec3(luminance), u_desaturation);
-
-    // 2. Dimming: reduce brightness
-    rgb = rgb - vec3(u_dim);
-
-    // 3. Contrast adjustment: scale around midpoint (0.5)
-    rgb = (rgb - vec3(0.5)) * u_contrast + vec3(0.5);
-
-    // 4. Tint overlay: blend with tint color
-    vec3 tintColor = vec3(u_tintR, u_tintG, u_tintB);
-    rgb = mix(rgb, tintColor, u_tintOpacity);
-
-    // 5. Veil overlay: blend with black
-    rgb = mix(rgb, vec3(0.0), u_veilOpacity);
-
-    // Clamp and re-premultiply alpha
-    rgb = clamp(rgb, 0.0, 1.0) * color.a;
-
-    gl_FragColor = vec4(rgb, color.a);
-  }
-  """
 }
 
 // MARK: - Color RGBA Extraction

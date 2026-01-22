@@ -6,81 +6,75 @@ import XCTest
 
 @MainActor
 final class SKSpriteNodeToneOverlayTests: XCTestCase {
-  // MARK: - Shader Application Tests
+  // MARK: - Overlay Application Tests
 
-  func testApplyToneOverlaySetsShader() {
+  func testApplyToneOverlaySetsColorBlendFactor() {
     let node = SKSpriteNode(color: .red, size: CGSize(width: 100, height: 100))
-    let style = ToneOverlayStyle(desaturation: 1.0, dim: 0.2, contrast: 0.9)
+    let style = ToneOverlayStyle(desaturation: 0.8, dim: 0.2, contrast: 0.9)
 
     node.applyToneOverlay(style: style)
 
-    XCTAssertNotNil(node.shader, "Shader should be set when overlay is applied")
+    XCTAssertEqual(node.colorBlendFactor, 0.8, accuracy: 0.01, "Color blend factor should match desaturation")
+    // Color should be some form of gray (RGB components equal)
+    #if canImport(UIKit)
+      var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
+      node.color.getRed(&r, green: &g, blue: &b, alpha: &a)
+      XCTAssertEqual(r, g, accuracy: 0.01, "Color should be gray")
+      XCTAssertEqual(g, b, accuracy: 0.01, "Color should be gray")
+    #endif
   }
 
-  func testRemoveToneOverlayClearsShader() {
+  func testApplyToneOverlayReducesAlphaForDimming() {
+    let node = SKSpriteNode(color: .red, size: CGSize(width: 100, height: 100))
+    let style = ToneOverlayStyle(desaturation: 0.0, dim: 0.3, contrast: 1.0)
+
+    node.applyToneOverlay(style: style)
+
+    // Alpha should be reduced by dim amount (1.0 - 0.3 = 0.7)
+    XCTAssertEqual(node.alpha, 0.7, accuracy: 0.01, "Alpha should be reduced for dimming")
+  }
+
+  func testRemoveToneOverlayRestoresDefaults() {
     let node = SKSpriteNode(color: .red, size: CGSize(width: 100, height: 100))
     let style = ToneOverlayStyle(desaturation: 1.0, dim: 0.2, contrast: 0.9)
 
-    // First apply it
+    // Apply then remove
     node.applyToneOverlay(style: style)
-    XCTAssertNotNil(node.shader)
-
-    // Then remove
     node.removeToneOverlay()
-    XCTAssertNil(node.shader, "Shader should be nil after removing overlay")
+
+    XCTAssertEqual(node.colorBlendFactor, 0, "Color blend factor should be reset")
+    XCTAssertEqual(node.alpha, 1.0, accuracy: 0.01, "Alpha should be restored")
   }
 
-  func testApplyToneOverlayShaderHasExpectedUniforms() {
+  func testApplyToneOverlayWithVeilAddsOverlayChild() {
     let node = SKSpriteNode(color: .blue, size: CGSize(width: 50, height: 50))
     let style = ToneOverlayStyle(
-      desaturation: 0.8,
-      dim: 0.15,
-      contrast: 0.85,
-      tint: .red,
-      tintOpacity: 0.1,
-      veilOpacity: 0.05
+      desaturation: 0.5,
+      dim: 0.0,
+      contrast: 1.0,
+      veilOpacity: 0.3
     )
 
     node.applyToneOverlay(style: style)
 
-    guard let shader = node.shader else {
-      XCTFail("Expected shader to be set")
-      return
-    }
-
-    let uniformNames = shader.uniforms.map(\.name)
-    XCTAssertTrue(uniformNames.contains("u_desaturation"))
-    XCTAssertTrue(uniformNames.contains("u_dim"))
-    XCTAssertTrue(uniformNames.contains("u_contrast"))
-    XCTAssertTrue(uniformNames.contains("u_tintR"))
-    XCTAssertTrue(uniformNames.contains("u_tintG"))
-    XCTAssertTrue(uniformNames.contains("u_tintB"))
-    XCTAssertTrue(uniformNames.contains("u_tintOpacity"))
-    XCTAssertTrue(uniformNames.contains("u_veilOpacity"))
+    let overlayChild = node.childNode(withName: "ToneOverlayEffectNode")
+    XCTAssertNotNil(overlayChild, "Overlay child should be added for veil effect")
   }
 
-  func testApplyToneOverlayUniformValuesMatchStyle() {
-    let node = SKSpriteNode(color: .green, size: CGSize(width: 50, height: 50))
+  func testRemoveToneOverlayRemovesOverlayChild() {
+    let node = SKSpriteNode(color: .blue, size: CGSize(width: 50, height: 50))
     let style = ToneOverlayStyle(
-      desaturation: 0.6,
-      dim: 0.25,
-      contrast: 0.7
+      desaturation: 0.5,
+      dim: 0.0,
+      contrast: 1.0,
+      veilOpacity: 0.3
     )
 
     node.applyToneOverlay(style: style)
+    node.removeToneOverlay()
 
-    guard let shader = node.shader else {
-      XCTFail("Expected shader to be set")
-      return
-    }
-
-    let desatUniform = shader.uniforms.first { $0.name == "u_desaturation" }
-    let dimUniform = shader.uniforms.first { $0.name == "u_dim" }
-    let contrastUniform = shader.uniforms.first { $0.name == "u_contrast" }
-
-    XCTAssertEqual(Double(desatUniform?.floatValue ?? 0), 0.6, accuracy: 0.0001)
-    XCTAssertEqual(Double(dimUniform?.floatValue ?? 0), 0.25, accuracy: 0.0001)
-    XCTAssertEqual(Double(contrastUniform?.floatValue ?? 0), 0.7, accuracy: 0.0001)
+    let overlayChild = node.childNode(withName: "ToneOverlayEffectNode")
+    XCTAssertNil(overlayChild, "Overlay child should be removed")
   }
 
   // MARK: - Color Extraction Tests
