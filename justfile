@@ -60,45 +60,8 @@ check: fix
 # Testing
 # ==============================================================================
 
-# Usage: just pkg-test [filter] [ci] [extra_args]
-# filter: Optional regex to filter tests (e.g., "ToneOverlayTests")
-# ci: Optional CI mode flag ("true" limits workers to 1)
-# extra_args: Additional arguments passed to swift test (e.g. "--skip-build")
-pkg-test filter="" ci="false" *extra_args:
-    #!/usr/bin/env bash
-    set -e
-    mkdir -p {{SWIFTPM_DEP_CACHE}}
-    mkdir -p {{SWIFTPM_ARTIFACT_ROOT}}
-    echo "🧪 Testing {{PACKAGE_NAME}}..."
-    
-    ARGS_ARRAY=()
-    for arg in {{extra_args}}; do
-        ARGS_ARRAY+=("$arg")
-    done
-    
-    if [ -n "{{filter}}" ];
-    then
-        ARGS_ARRAY+=(--filter "{{filter}}")
-        echo "📋 Filtering tests with: {{filter}}"
-    else
-        echo "📋 Running all tests"
-    fi
-    
-    if [ "{{ci}}" = "true" ];
-    then
-        echo "🔧 CI Mode: Running with 1 worker to save resources..."
-        ARGS_ARRAY+=(--parallel --num-workers 1)
-    else
-        echo "🚀 Local Mode: Running in parallel..."
-        WORKERS=$(sysctl -n hw.ncpu)
-        ARGS_ARRAY+=(--parallel --num-workers "$WORKERS")
-    fi
-    
-    echo "Running: swift test ${ARGS_ARRAY[@]}"
-    swift test --cache-path "{{SWIFTPM_DEP_CACHE}}" \
-               --scratch-path "{{SWIFTPM_ARTIFACT_ROOT}}" \
-               "${ARGS_ARRAY[@]}"
-    echo "✅ Tests complete."
+pkg-test *args:
+    @swift test --parallel {{args}}
 
 # Run all tests
 test:
