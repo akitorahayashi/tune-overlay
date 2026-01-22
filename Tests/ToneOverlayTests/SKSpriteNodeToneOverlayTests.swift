@@ -8,26 +8,26 @@ import XCTest
 final class SKSpriteNodeToneOverlayTests: XCTestCase {
   // MARK: - Shader Application Tests
 
-  func testApplyToneOverlayWhenActiveSetsShader() {
+  func testApplyToneOverlaySetsShader() {
     let node = SKSpriteNode(color: .red, size: CGSize(width: 100, height: 100))
     let style = ToneOverlayStyle(desaturation: 1.0, dim: 0.2, contrast: 0.9)
 
-    node.applyToneOverlay(isActive: true, style: style)
+    node.applyToneOverlay(style: style)
 
-    XCTAssertNotNil(node.shader, "Shader should be set when overlay is active")
+    XCTAssertNotNil(node.shader, "Shader should be set when overlay is applied")
   }
 
-  func testApplyToneOverlayWhenInactiveRemovesShader() {
+  func testRemoveToneOverlayClearsShader() {
     let node = SKSpriteNode(color: .red, size: CGSize(width: 100, height: 100))
     let style = ToneOverlayStyle(desaturation: 1.0, dim: 0.2, contrast: 0.9)
 
     // First apply it
-    node.applyToneOverlay(isActive: true, style: style)
+    node.applyToneOverlay(style: style)
     XCTAssertNotNil(node.shader)
 
-    // Then deactivate
-    node.applyToneOverlay(isActive: false, style: style)
-    XCTAssertNil(node.shader, "Shader should be nil when overlay is inactive")
+    // Then remove
+    node.removeToneOverlay()
+    XCTAssertNil(node.shader, "Shader should be nil after removing overlay")
   }
 
   func testApplyToneOverlayShaderHasExpectedUniforms() {
@@ -41,7 +41,7 @@ final class SKSpriteNodeToneOverlayTests: XCTestCase {
       veilOpacity: 0.05
     )
 
-    node.applyToneOverlay(isActive: true, style: style)
+    node.applyToneOverlay(style: style)
 
     guard let shader = node.shader else {
       XCTFail("Expected shader to be set")
@@ -67,7 +67,7 @@ final class SKSpriteNodeToneOverlayTests: XCTestCase {
       contrast: 0.7
     )
 
-    node.applyToneOverlay(isActive: true, style: style)
+    node.applyToneOverlay(style: style)
 
     guard let shader = node.shader else {
       XCTFail("Expected shader to be set")

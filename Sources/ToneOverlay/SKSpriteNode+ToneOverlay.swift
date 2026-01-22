@@ -2,23 +2,25 @@ import SpriteKit
 import SwiftUI
 
 extension SKSpriteNode {
-  /// Applies or removes a tone overlay effect to the sprite node.
+  // Precompiled base shader for performance - copying is cheaper than recompiling
+  private static let baseToneOverlayShader = SKShader(source: toneOverlayShaderSource)
+
+  /// Applies a tone overlay effect to the sprite node.
   ///
-  /// When active, the shader applies desaturation, dimming, contrast adjustment,
+  /// The shader applies desaturation, dimming, contrast adjustment,
   /// tinting, and veil effects matching the SwiftUI `toneOverlay` modifier.
   ///
-  /// - Parameters:
-  ///   - isActive: Whether the overlay effect is applied. When `false`, the shader is removed.
-  ///   - style: The visual style configuration for the overlay effect.
-  public func applyToneOverlay(isActive: Bool, style: ToneOverlayStyle) {
-    guard isActive else {
-      self.shader = nil
-      return
-    }
-
-    let shader = SKShader(source: Self.toneOverlayShaderSource)
+  /// - Parameter style: The visual style configuration for the overlay effect.
+  public func applyToneOverlay(style: ToneOverlayStyle) {
+    // swiftlint:disable:next force_cast
+    let shader = Self.baseToneOverlayShader.copy() as! SKShader
     shader.uniforms = Self.uniforms(for: style)
     self.shader = shader
+  }
+
+  /// Removes the tone overlay effect from the sprite node.
+  public func removeToneOverlay() {
+    self.shader = nil
   }
 
   private static func uniforms(for style: ToneOverlayStyle) -> [SKUniform] {

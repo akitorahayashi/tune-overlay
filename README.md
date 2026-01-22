@@ -18,7 +18,7 @@ The package is added as a dependency in `Package.swift`:
 let package = Package(
     name: "YourApp",
     dependencies: [
-        .package(url: "https://github.com/your-org/tone-overlay", from: "0.1.0")
+        .package(url: "https://github.com/akitorahayashi/tone-overlay", from: "0.1.0")
     ],
     targets: [
         .target(
@@ -65,10 +65,10 @@ let style = ToneOverlayStyle(
 )
 
 let sprite = SKSpriteNode(imageNamed: "planet")
-sprite.applyToneOverlay(isActive: true, style: style)
+sprite.applyToneOverlay(style: style)
 
 // To remove the overlay effect:
-sprite.applyToneOverlay(isActive: false, style: style)
+sprite.removeToneOverlay()
 ```
 
 ## Style parameters
