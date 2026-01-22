@@ -40,14 +40,12 @@ extension SKSpriteNode {
 
   // MARK: - Shader Source
 
+  // SpriteKit fragment shader for tone overlay effects
+  // Uses texture2D for compatibility (SpriteKit converts to Metal)
   private static let toneOverlayShaderSource = """
-  // SpriteKit shader for tone overlay effects
-  // Uniform declarations (SpriteKit auto-injects these)
-  // u_desaturation, u_dim, u_contrast, u_tintR, u_tintG, u_tintB, u_tintOpacity, u_veilOpacity
-
   void main() {
-    // Sample the texture using SpriteKit's built-in texture sampler
-    vec4 color = SKDefaultShading();
+    // Sample the texture at current coordinates
+    vec4 color = texture2D(u_texture, v_tex_coord);
 
     // Skip fully transparent pixels
     if (color.a < 0.001) {
