@@ -2,34 +2,49 @@ import SpriteKit
 import SwiftUI
 
 extension SKSpriteNode {
-  /// Key used to identify the overlay effect node.
-  private static let overlayNodeName = "ToneOverlayEffectNode"
+  /// Storage key for original alpha value
+  private static var originalAlphaKey: UInt8 = 0
 
   /// Applies a tone overlay effect to the sprite node.
   ///
-  /// This implementation uses an SKEffectNode with CoreImage filters
-  /// to achieve desaturation, dimming, and contrast effects, plus
-  /// a color overlay child node for tinting.
+  /// This implementation uses SpriteKit's built-in colorBlendFactor
+  /// to achieve desaturation and darkening effects while respecting
+  /// the sprite's transparent regions.
   ///
   /// - Parameter style: The visual style configuration for the overlay effect.
   public func applyToneOverlay(style: ToneOverlayStyle) {
-    // Apply grayscale effect via color blend (approximation of desaturation)
-    self.colorBlendFactor = CGFloat(style.desaturation)
-    self.color = .gray
-
-    // Add or update overlay node for veil/tint effects
-    if let existing = self.childNode(withName: Self.overlayNodeName) as? SKSpriteNode {
-      self.configureOverlayNode(existing, style: style)
-    } else if style.veilOpacity > 0 || style.tintOpacity > 0 {
-      let overlayNode = SKSpriteNode(color: .clear, size: self.size)
-      overlayNode.name = Self.overlayNodeName
-      overlayNode.zPosition = 100
-      self.configureOverlayNode(overlayNode, style: style)
-      self.addChild(overlayNode)
+    // Store original alpha if not already stored
+    if objc_getAssociatedObject(self, &Self.originalAlphaKey) == nil {
+      objc_setAssociatedObject(self, &Self.originalAlphaKey, self.alpha, .OBJC_ASSOCIATION_RETAIN)
     }
 
-    // Apply brightness reduction (dimming) - use alpha as approximation
-    let dimAlpha = max(0.3, 1.0 - style.dim)
+    // Calculate the effective darkening color
+    // Combine desaturation (gray), veil (black), and tint into a single blend color
+    let tintComponents = style.tint.rgbaComponents
+
+    // Weight factors for combining effects
+    let veilWeight = style.veilOpacity
+    let tintWeight = style.tintOpacity * (1.0 - veilWeight)
+    let grayWeight = style.desaturation * (1.0 - veilWeight - tintWeight)
+
+    // Blend colors: veil (black) + tint + gray
+    let r = tintComponents.red * tintWeight + 0.5 * grayWeight
+    let g = tintComponents.green * tintWeight + 0.5 * grayWeight
+    let b = tintComponents.blue * tintWeight + 0.5 * grayWeight
+
+    #if canImport(UIKit)
+      self.color = UIColor(red: r, green: g, blue: b, alpha: 1.0)
+    #else
+      self.color = NSColor(red: r, green: g, blue: b, alpha: 1.0)
+    #endif
+
+    // colorBlendFactor controls how much the color replaces the original texture
+    // Higher values = more of the blend color, less of the original
+    let totalBlend = min(1.0, style.desaturation + style.veilOpacity + style.tintOpacity)
+    self.colorBlendFactor = CGFloat(totalBlend)
+
+    // Apply dimming via alpha reduction
+    let dimAlpha = max(0.2, 1.0 - style.dim)
     self.alpha = CGFloat(dimAlpha)
   }
 
@@ -37,30 +52,14 @@ extension SKSpriteNode {
   public func removeToneOverlay() {
     self.colorBlendFactor = 0
     self.color = .white
-    self.alpha = 1.0
-    self.childNode(withName: Self.overlayNodeName)?.removeFromParent()
-  }
 
-  private func configureOverlayNode(_ node: SKSpriteNode, style: ToneOverlayStyle) {
-    node.size = self.size
-
-    // Combine tint and veil into overlay color
-    let tintComponents = style.tint.rgbaComponents
-    let veilWeight = style.veilOpacity
-    let tintWeight = style.tintOpacity * (1.0 - veilWeight)
-
-    // Blend tint with black (veil)
-    let r = tintComponents.red * tintWeight
-    let g = tintComponents.green * tintWeight
-    let b = tintComponents.blue * tintWeight
-    let alpha = min(1.0, tintWeight + veilWeight)
-
-    #if canImport(UIKit)
-      node.color = UIColor(red: r, green: g, blue: b, alpha: alpha)
-    #else
-      node.color = NSColor(red: r, green: g, blue: b, alpha: alpha)
-    #endif
-    node.colorBlendFactor = 1.0
+    // Restore original alpha
+    if let originalAlpha = objc_getAssociatedObject(self, &Self.originalAlphaKey) as? CGFloat {
+      self.alpha = originalAlpha
+      objc_setAssociatedObject(self, &Self.originalAlphaKey, nil, .OBJC_ASSOCIATION_RETAIN)
+    } else {
+      self.alpha = 1.0
+    }
   }
 }
 

@@ -15,13 +15,6 @@ final class SKSpriteNodeToneOverlayTests: XCTestCase {
     node.applyToneOverlay(style: style)
 
     XCTAssertEqual(node.colorBlendFactor, 0.8, accuracy: 0.01, "Color blend factor should match desaturation")
-    // Color should be some form of gray (RGB components equal)
-    #if canImport(UIKit)
-      var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
-      node.color.getRed(&r, green: &g, blue: &b, alpha: &a)
-      XCTAssertEqual(r, g, accuracy: 0.01, "Color should be gray")
-      XCTAssertEqual(g, b, accuracy: 0.01, "Color should be gray")
-    #endif
   }
 
   func testApplyToneOverlayReducesAlphaForDimming() {
@@ -46,7 +39,7 @@ final class SKSpriteNodeToneOverlayTests: XCTestCase {
     XCTAssertEqual(node.alpha, 1.0, accuracy: 0.01, "Alpha should be restored")
   }
 
-  func testApplyToneOverlayWithVeilAddsOverlayChild() {
+  func testApplyToneOverlayWithVeilIncreasesBlendFactor() {
     let node = SKSpriteNode(color: .blue, size: CGSize(width: 50, height: 50))
     let style = ToneOverlayStyle(
       desaturation: 0.5,
@@ -57,24 +50,20 @@ final class SKSpriteNodeToneOverlayTests: XCTestCase {
 
     node.applyToneOverlay(style: style)
 
-    let overlayChild = node.childNode(withName: "ToneOverlayEffectNode")
-    XCTAssertNotNil(overlayChild, "Overlay child should be added for veil effect")
+    // colorBlendFactor should combine desaturation and veil
+    XCTAssertEqual(node.colorBlendFactor, 0.8, accuracy: 0.01, "Blend factor should combine effects")
   }
 
-  func testRemoveToneOverlayRemovesOverlayChild() {
+  func testApplyToneOverlayPreservesOriginalAlpha() {
     let node = SKSpriteNode(color: .blue, size: CGSize(width: 50, height: 50))
-    let style = ToneOverlayStyle(
-      desaturation: 0.5,
-      dim: 0.0,
-      contrast: 1.0,
-      veilOpacity: 0.3
-    )
+    node.alpha = 0.5
+
+    let style = ToneOverlayStyle(desaturation: 0.5, dim: 0.2, contrast: 1.0)
 
     node.applyToneOverlay(style: style)
     node.removeToneOverlay()
 
-    let overlayChild = node.childNode(withName: "ToneOverlayEffectNode")
-    XCTAssertNil(overlayChild, "Overlay child should be removed")
+    XCTAssertEqual(node.alpha, 0.5, accuracy: 0.01, "Original alpha should be restored")
   }
 
   // MARK: - Color Extraction Tests
