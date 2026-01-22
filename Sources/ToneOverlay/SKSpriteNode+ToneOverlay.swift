@@ -42,8 +42,8 @@ extension SKSpriteNode {
 
   private static let toneOverlayShaderSource = """
   void main() {
-    // Sample the texture
-    vec4 color = texture2D(u_texture, v_tex_coord);
+    // Sample the texture using SpriteKit's built-in texture sampler
+    vec4 color = SKDefaultShading();
 
     // Skip fully transparent pixels
     if (color.a < 0.001) {
