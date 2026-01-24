@@ -84,7 +84,7 @@ pages-build:
     @mkdir -p "{{PAGES_OUTPUT}}"
     @rm -rf "{{PAGES_OUTPUT}}/{{PACKAGE_NAME}}"
     @cp -R ".build/plugins/Swift-DocC/outputs/{{DOCS_TARGET}}.doccarchive" "{{PAGES_OUTPUT}}/{{PACKAGE_NAME}}"
-    @printf '%s\n' '<!doctype html>' '<html lang="en">' '  <head>' '    <meta charset="utf-8">' "    <meta http-equiv=\"refresh\" content=\"0; url=/{{PACKAGE_NAME}}/{{DOCS_ENTRY_PATH}}\">" "    <link rel=\"canonical\" href=\"/{{PACKAGE_NAME}}/{{DOCS_ENTRY_PATH}}\">" '    <title>ToneOverlay Documentation</title>' '  </head>' '  <body>' "    <p>Redirecting to <a href=\"/{{PACKAGE_NAME}}/{{DOCS_ENTRY_PATH}}\">Documentation</a>...</p>" '  </body>' '</html>' > "{{PAGES_OUTPUT}}/{{PACKAGE_NAME}}/index.html"
+    @cp ".github/pages/index.html" "{{PAGES_OUTPUT}}/{{PACKAGE_NAME}}/index.html"
 
 # Build DocC and preview the GitHub Pages output locally.
 pages-preview:
