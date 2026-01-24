@@ -40,3 +40,5 @@ fastlane/report.xml
 project.yml
 
 .tmp/
+.pages/
+.docc-preview/
