@@ -84,6 +84,9 @@ identifier_name:
     - x
     - y
     - i
+    - r
+    - g
+    - b
     - to
     - at
     - of

@@ -14,12 +14,20 @@ nodes (via SKSpriteNode extension), using a shared `ToneOverlayStyle` configurat
 
 - **Language**: Swift
 - **Package Manager**: Swift Package Manager (SPM)
-- **Dependencies**: None
+- **Dependencies**: `swift-docc-plugin` for documentation generation
 
 ## Coding Standards
 
 - SwiftFormat config: `.swiftformat` (4-space indentation, 120 max line width, explicit `self`).
 - SwiftLint config: `.swiftlint.yml` (explicit `self`, unused declarations/imports, complexity limits).
+
+## Documentation Boundary
+
+- `README.md` is the entry point for first-time readers and includes package purpose, requirements, dependency setup, and minimal usage examples.
+- DocC is the primary location for API reference, parameter semantics, and extended usage examples.
+- DocC is published to GitHub Pages via `.github/workflows/publish-docc.yml`.
+- Public API changes have corresponding DocC updates, including symbol doc comments and any relevant DocC pages.
+- Behavior changes that affect existing usage have corresponding README updates when the minimal examples or integration notes change.
 
 ## Key Commands
 

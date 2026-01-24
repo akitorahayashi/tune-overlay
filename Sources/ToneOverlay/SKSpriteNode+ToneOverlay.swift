@@ -1,7 +1,7 @@
 import SpriteKit
 import SwiftUI
 
-extension SKSpriteNode {
+public extension SKSpriteNode {
   /// Storage key for original alpha value
   private static var originalAlphaKey: UInt8 = 0
 
@@ -12,7 +12,7 @@ extension SKSpriteNode {
   /// the sprite's transparent regions.
   ///
   /// - Parameter style: The visual style configuration for the overlay effect.
-  public func applyToneOverlay(style: ToneOverlayStyle) {
+  func applyToneOverlay(style: ToneOverlayStyle) {
     // Store original alpha if not already stored
     if objc_getAssociatedObject(self, &Self.originalAlphaKey) == nil {
       objc_setAssociatedObject(self, &Self.originalAlphaKey, self.alpha, .OBJC_ASSOCIATION_RETAIN)
@@ -49,7 +49,7 @@ extension SKSpriteNode {
   }
 
   /// Removes the tone overlay effect from the sprite node.
-  public func removeToneOverlay() {
+  func removeToneOverlay() {
     self.colorBlendFactor = 0
     self.color = .white
 

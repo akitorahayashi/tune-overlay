@@ -1,8 +1,7 @@
 # ToneOverlay
 
-ToneOverlay is a Swift package that applies customizable tone adjustments and overlays while preserving
-transparency. The package supports both SwiftUI views and SpriteKit nodes, using a shared
-`ToneOverlayStyle` configuration model.
+ToneOverlay is a Swift package that applies tone adjustments while preserving transparency.
+The package supports both SwiftUI views and SpriteKit nodes via a shared `ToneOverlayStyle`.
 
 ## Requirements
 
@@ -10,7 +9,7 @@ transparency. The package supports both SwiftUI views and SpriteKit nodes, using
 - macOS 13 or later
 - Swift 6
 
-## Package Usage
+## Installation
 
 The package is added as a dependency in `Package.swift`:
 
@@ -31,7 +30,9 @@ let package = Package(
 )
 ```
 
-The library is imported and the modifier is applied in SwiftUI with explicit style values:
+## Quick Start
+
+The library is imported and the modifier is applied in SwiftUI:
 
 ```swift
 import ToneOverlay
@@ -41,27 +42,27 @@ let style = ToneOverlayStyle(
     desaturation: 0.6,
     dim: 0.18,
     contrast: 0.9,
-    tint: .black,
-    tintOpacity: 0.12,
-    veilOpacity: 0.08
+    tint: .black
 )
 
 Image("red_ball")
     .toneOverlay(style: style)
 ```
 
-## SpriteKit Usage
-
-The same style configuration applies to SpriteKit nodes via an `SKSpriteNode` extension:
+The same style configuration applies to SpriteKit nodes:
 
 ```swift
 import ToneOverlay
 import SpriteKit
+import SwiftUI
 
 let style = ToneOverlayStyle(
     desaturation: 1.0,
     dim: 0.2,
-    contrast: 0.8
+    contrast: 0.8,
+    tint: Color.black,
+    tintOpacity: 0.12,
+    veilOpacity: 0.08
 )
 
 let sprite = SKSpriteNode(imageNamed: "planet")
@@ -71,49 +72,11 @@ sprite.applyToneOverlay(style: style)
 sprite.removeToneOverlay()
 ```
 
-## Style parameters
+## Documentation
 
-- desaturation reduces color intensity
-- dim darkens the content
-- contrast controls contrast
-- tint and tintOpacity apply a color overlay
-- veilOpacity applies a soft veil
-
-## Tint only example
-
-```swift
-let alertStyle = ToneOverlayStyle.tinted(
-    color: .red,
-    opacity: 0.35,
-    desaturation: 0.0,
-    dim: 0.0,
-    contrast: 1.0
-)
-
-Image("enemy_icon")
-    .toneOverlay(style: alertStyle)
-```
-
-## Animation
-
-The transition between active and inactive states can be animated using standard SwiftUI animation modifiers:
-
-```swift
-// Example 1: Using `withAnimation` for implicit animation.
-// Assumes `isActive` is a @State var.
-VStack {
-    Image("icon")
-        .toneOverlay(isActive: isActive, style: style)
-    Button("Toggle") {
-        withAnimation { isActive.toggle() }
-    }
-}
-
-// Example 2: Using the `.animation()` modifier for explicit animation.
-Image("icon")
-    .toneOverlay(isActive: isActive, style: style)
-    .animation(.easeInOut, value: isActive)
-```
+- API reference and extended usage examples live in DocC and are published to GitHub Pages via `.github/workflows/publish-docc.yml`.
+- Local DocC output is generated via:
+  - `swift package generate-documentation --target ToneOverlay`
 
 ## Development
 

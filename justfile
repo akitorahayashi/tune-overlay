@@ -68,6 +68,32 @@ test:
     @just pkg-test
 
 # ==============================================================================
+# Documentation
+# ==============================================================================
+
+DOCS_TARGET := "ToneOverlay"
+PAGES_OUTPUT := ".pages"
+DOCS_ENTRY_PATH := "documentation/toneoverlay/"
+
+# Build DocC output for GitHub Pages.
+pages-build:
+    @swift package generate-documentation \
+        --target "{{DOCS_TARGET}}" \
+        --transform-for-static-hosting \
+        --hosting-base-path "{{PACKAGE_NAME}}"
+    @mkdir -p "{{PAGES_OUTPUT}}"
+    @rm -rf "{{PAGES_OUTPUT}}/{{PACKAGE_NAME}}"
+    @cp -R ".build/plugins/Swift-DocC/outputs/{{DOCS_TARGET}}.doccarchive" "{{PAGES_OUTPUT}}/{{PACKAGE_NAME}}"
+    @cp ".github/pages/index.html" "{{PAGES_OUTPUT}}/{{PACKAGE_NAME}}/index.html"
+
+# Build DocC and preview the GitHub Pages output locally.
+pages-preview:
+    @just pages-build
+    @echo "Serving DocC at: http://localhost:8000/{{PACKAGE_NAME}}/"
+    @if command -v open >/dev/null 2>&1; then open "http://localhost:8000/{{PACKAGE_NAME}}/"; fi
+    @python3 -m http.server 8000 --directory "{{PAGES_OUTPUT}}"
+
+# ==============================================================================
 # CLEANUP
 # ==============================================================================
 

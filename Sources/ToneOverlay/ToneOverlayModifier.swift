@@ -1,6 +1,11 @@
 import SwiftUI
 
 public extension View {
+  /// Adds a tone overlay effect to the view when the overlay is active.
+  /// - Parameters:
+  ///   - isActive: A Boolean that controls whether the overlay is applied.
+  ///   - style: The visual style configuration for the overlay effect.
+  /// - Returns: A view that renders with the overlay when active.
   func toneOverlay(isActive: Bool = true, style: ToneOverlayStyle) -> some View {
     self.modifier(ToneOverlayModifier(isActive: isActive, style: style))
   }
